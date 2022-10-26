@@ -97,27 +97,27 @@ class LinkedGraph:
 
         queue_vertex = deque()  # создание очереди из вершин на проверку
         queue_vertex.append(self._vertex[vertex])  # добавление в очередь стартовой вершины для трекинга
-        connections = {k: inf for k in self._vertex}  # словарь с расстояниями от v_start до v_stop
-        connections[self._vertex[vertex]] = 0
+        connections = {k: inf for k in self._vertex}  # словарь с расстояниями от v_start до других вершин
+        connections[self._vertex[vertex]] = 0  # инициализация словаря нулевой начальной вершиной
 
         routes = {vertex: 0}  # словарь с key - id вершины(куда "пришли"); value - вершина с которой "пришли" в key
 
         while queue_vertex:  # пока есть необработанные вершины
             cur_v = queue_vertex.pop()
-            for end_point in cur_v.links:
-                v1, v2 = getattr(end_point, 'v1'), getattr(end_point, 'v2')
+            for link in cur_v.links:
+                v1, v2 = getattr(link, 'v1'), getattr(link, 'v2')
                 related_v = v2 if cur_v.id != v2.id else v1  # определение связанной вершины с текущей вершиной
-                if connections[cur_v] + end_point.dist < connections[related_v]:  # если расстояние уменьшилось
-                    connections[related_v] = connections[cur_v] + end_point.dist  # обновляем в словаре расстояний
+                if connections[cur_v] + link.dist < connections[related_v]:  # если расстояние уменьшилось
+                    connections[related_v] = connections[cur_v] + link.dist  # обновляем в словаре расстояний
                     queue_vertex.append(related_v)  # и добавляем в очередь связанную вершину
                     routes[related_v.id] = cur_v.id  # необходимо для получения вершин между первой и последней
 
         # формирование списка id вершин между первой и последней включительно
         path_points = []
-        for end_point in routes.keys():
-            if end_point == stop_v.id:
-                path_points.append(routes[end_point])
-                while path_points[-1] != start_v.id:
+        for vertex_id in routes.keys():
+            if vertex_id == stop_v.id:
+                path_points.append(routes[vertex_id])
+                while path_points[-1] != start_v.id:  # пока не дошли до начальной вершине
                     path_points.append(routes[path_points[-1]])
                 else:
                     path_points.insert(0, stop_v.id)
