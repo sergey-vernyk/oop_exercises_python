@@ -33,7 +33,7 @@ class MaxPooling:
         return res_array.tolist()  # преобразование из объекта numpy в обычный список перед возвратом
 
     @staticmethod
-    def get_pools(array: list, size: tuple, step: tuple):
+    def get_pools(array: list, size: tuple, step: tuple) -> list:
          """Метод для получения матриц из окна, размером size * size, 
          с шагом step"""
         conv_output = np.array(array)  # преобразование в объект матриц numpy
