@@ -290,6 +290,20 @@ class SeaBattle:
         self.computer.init()
         self.human.init()
 
+    @staticmethod
+    def get_all_ships_parts_coord(field: GamePole) -> dict:
+        """Метод для получения координат всех палуб кораблей"""
+        ships = field.ships
+        ship_coord = {ship: [] for ship in ships}
+        for ship, coord in ship_coord.items():
+            x, y = ship.get_start_coords()
+            length = ship.length
+            for i in range(length):
+                next_x_y = (x + i, y) if ship.tp == ship.HORIZONTAL else (x, y + i)
+                coord.append(next_x_y)
+
+        return ship_coord
+
     def recognize_shell_place(self, shell_coord: tuple):
         """Метод для распознавания места куда попал снаряд"""
         pass
@@ -323,5 +337,6 @@ battle = SeaBattle(10)
 battle.init_fields()
 battle.human.show()
 battle.computer.show()
-battle.human_go()
+# battle.human_go()
+battle.get_all_ships_parts_coord(battle.human)
 pass
