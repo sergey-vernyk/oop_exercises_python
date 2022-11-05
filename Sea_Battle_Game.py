@@ -1,5 +1,4 @@
 from random import randint, shuffle
-import timeit
 
 
 class Ship:
@@ -264,9 +263,65 @@ class GamePole:
 
     def show(self):
         """Метод для отображения игрового поля в консоли"""
+        print('_' * (self._size * 2 - 1))
         for row in self._field:
             print(*row, end='\n')
+        print('_' * (self._size * 2 - 1))
 
     def get_pole(self) -> tuple:
         """Метод для получения текущего игрового поля"""
         return tuple(tuple(row) for row in self._field)
+
+    def __repr__(self) -> str:
+        return f'Размер поля - {self._size} x {self._size}'
+
+
+class SeaBattle:
+    """Класс для настройки и работы игрового процесса"""
+    _x_coord_translate = {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6, 'g': 7, 'h': 8, 'i': 9, 'j': 10}
+
+    def __init__(self, size_field):
+        self.computer = GamePole(size_field)
+        self.human = GamePole(size_field)
+
+    def init_fields(self):
+        """Метод инициализации полей компьютера и человека.
+        Метод производит расстановку кораблей на полях соперников"""
+        self.computer.init()
+        self.human.init()
+
+    def recognize_shell_place(self, shell_coord: tuple):
+        """Метод для распознавания места куда попал снаряд"""
+        pass
+
+    def human_go(self):
+        """Метод для реализации хода человека"""
+        x = y = None
+        while True:
+            try:
+                coord = input('Введите координаты поля для выстрела в формате "a 1", "j 10", "g 3"').split()
+                x, y = coord
+            except (TypeError, IndexError, ValueError):
+                print('Введен не верный тип и/или диапазон координат')
+                continue
+            else:
+                if coord[0] in 'abcdefghij' and '1' <= coord[1] in '123456789':
+                    x, y = self._x_coord_translate.get(coord[0]) - 1, int(coord[1]) - 1
+                    print('Неверный формат ввода')
+                    break
+                continue
+
+        field_comp = self.computer.get_pole()
+        aim = field_comp[x][y]
+
+    def computer_go(self):
+        """Метод для реализации хода компьютера
+         случайным образом в свободные клетки"""
+
+
+battle = SeaBattle(10)
+battle.init_fields()
+battle.human.show()
+battle.computer.show()
+battle.human_go()
+pass
