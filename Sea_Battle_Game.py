@@ -1,4 +1,5 @@
 from random import randint, shuffle
+import pprint
 
 
 class Ship:
@@ -279,22 +280,26 @@ class GamePole:
 class SeaBattle:
     """Класс для настройки и работы игрового процесса"""
     _x_coord_translate = {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6, 'g': 7, 'h': 8, 'i': 9, 'j': 10}
+    _comp_ships_coord = {}  # координаты всех палуб кораблей компьютера
+    _human_ships_coord = {}  # координаты всех палуб кораблей человека
 
     def __init__(self, size_field):
         self.computer = GamePole(size_field)
         self.human = GamePole(size_field)
 
-    def init_fields(self):
+    def init(self):
         """Метод инициализации полей компьютера и человека.
         Метод производит расстановку кораблей на полях соперников"""
         self.computer.init()
         self.human.init()
+        self._comp_ships_coord = self.get_all_ships_parts_coord(self.computer)
+        self._human_ships_coord = self.get_all_ships_parts_coord(self.human)
 
     @staticmethod
     def get_all_ships_parts_coord(field: GamePole) -> dict:
         """Метод для получения координат всех палуб кораблей"""
-        ships = field.ships
-        ship_coord = {ship: [] for ship in ships}
+        ships = field.ships  # получение списка всех кораблей поля
+        ship_coord = {ship: [] for ship in ships}  # словарь с будущими координатами палуб
         for ship, coord in ship_coord.items():
             x, y = ship.get_start_coords()
             length = ship.length
@@ -319,7 +324,7 @@ class SeaBattle:
                 print('Введен не верный тип и/или диапазон координат')
                 continue
             else:
-                if coord[0] in 'abcdefghij' and '1' <= coord[1] in '123456789':
+                if coord[0].lower() in 'abcdefghij' and '1' <= coord[1] in '123456789':
                     x, y = self._x_coord_translate.get(coord[0]) - 1, int(coord[1]) - 1
                     print('Неверный формат ввода')
                     break
@@ -334,9 +339,8 @@ class SeaBattle:
 
 
 battle = SeaBattle(10)
-battle.init_fields()
+battle.init()
 battle.human.show()
 battle.computer.show()
-# battle.human_go()
-battle.get_all_ships_parts_coord(battle.human)
+battle.human_go()
 pass
