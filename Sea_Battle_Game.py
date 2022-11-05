@@ -50,7 +50,7 @@ class Ship:
         """Получение начальных координат корабля"""
         return self._x, self._y
 
-    def move(self, go: int):  # TODO
+    def move(self, go: int):
         """Метод реализует перемещения корабля в направлении его ориентации на 'go' клеток"""
         if self._is_move:
             x, y = self.get_start_coords()
