@@ -1,5 +1,5 @@
 from random import randint, shuffle
-import pprint
+from typing import Union
 
 
 class Ship:
@@ -120,10 +120,20 @@ class GamePole:
         self._size = size  # размер игрового поля
         self._ships = []  # список из кораблей на поле
         self._field = [[0] * self._size for _ in range(self._size)]  # игровое поле
+        self._name = ''
 
     @property
     def ships(self):
         return self._ships
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        if isinstance(value, str):
+            self._name = value
 
     def _check_ships_around(self, length: int, head_coord: tuple, orientation: int) -> int:
         """Метод для проверки наличия кораблей вокруг и на месте установки корабля"""
@@ -264,6 +274,7 @@ class GamePole:
 
     def show(self):
         """Метод для отображения игрового поля в консоли"""
+        print(f'{self.name:^{self._size * 2}}')
         print('_' * (self._size * 2 - 1))
         for row in self._field:
             print(*row, end='\n')
@@ -283,9 +294,14 @@ class SeaBattle:
     _comp_ships_coord = {}  # координаты всех палуб кораблей компьютера
     _human_ships_coord = {}  # координаты всех палуб кораблей человека
 
-    def __init__(self, size_field):
+    def __init__(self, size_field, name_1: str = 'Computer', name_2: str = 'Human'):
+        self._size_field = size_field
         self.computer = GamePole(size_field)
+        self.computer.name = name_1
         self.human = GamePole(size_field)
+        self.human.name = name_2
+        self._hit_points_comp = []  # координаты, в которые уже был выстрел
+        self._hit_points_human = []
 
     def init(self):
         """Метод инициализации полей компьютера и человека.
@@ -309,9 +325,11 @@ class SeaBattle:
 
         return ship_coord
 
-    def recognize_shell_place(self, shell_coord: tuple):
-        """Метод для распознавания места куда попал снаряд"""
-        pass
+    def recognize_shell_place(self, shell_coord: tuple, gamer: GamePole) -> Union[Ship, None]:
+        """Метод для распознавания места попадания снаряда"""
+        ships = self._comp_ships_coord if gamer is self.human else self._human_ships_coord
+        place = list(filter(lambda x: shell_coord in ships[x], ships))
+        return place[0] if place else None  # если есть попадание в корабль - вернуть корабль
 
     def human_go(self):
         """Метод для реализации хода человека"""
@@ -324,14 +342,16 @@ class SeaBattle:
                 print('Введен не верный тип и/или диапазон координат')
                 continue
             else:
-                if coord[0].lower() in 'abcdefghij' and '1' <= coord[1] in '123456789':
+                if coord[0].lower() in [chr(let) for let in range(97, 97 + self._size_field)] and \
+                        coord[1] in [str(d) for d in range(1, self._size_field + 1)]:
                     x, y = self._x_coord_translate.get(coord[0]) - 1, int(coord[1]) - 1
-                    print('Неверный формат ввода')
                     break
                 continue
 
-        field_comp = self.computer.get_pole()
-        aim = field_comp[x][y]
+        shell_place = self.recognize_shell_place((x, y), self.human)  # определение места попадания снаряда
+        self._hit_points_human.append((x, y))  # и сохранение координат места в список
+        if shell_place:
+            pass
 
     def computer_go(self):
         """Метод для реализации хода компьютера
