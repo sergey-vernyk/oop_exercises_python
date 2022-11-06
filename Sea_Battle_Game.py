@@ -41,6 +41,11 @@ class Ship:
     def is_move(self):
         return self._is_move
 
+    @is_move.setter
+    def is_move(self, value):
+        if type(value) == bool:
+            self._is_move = value
+
     def set_start_coords(self, x: int, y: int):
         """Метод для установки начальных координат корабля"""
         self._x = x
@@ -181,7 +186,7 @@ class GamePole:
                     if not result:  # если кораблей нет рядом и нет на месте
                         k = 0
                         for j in range(x, x + length):
-                            self._field[y][j] = ship.__getitem__(k)  # установка корабля на поле с k-палубами
+                            self._field[y][j] = ship[k]  # установка корабля на поле с k-палубами
                             k += 1
                     else:
                         continue
@@ -195,7 +200,7 @@ class GamePole:
                     if not result:  # если кораблей нет рядом и нет на месте
                         k = 0
                         for i in range(y, y + length):
-                            self._field[i][x] = ship.__getitem__(k)
+                            self._field[i][x] = ship[k]
                             k += 1
                     else:
                         continue
@@ -220,11 +225,11 @@ class GamePole:
 
             if ship.tp == ship.HORIZONTAL:
                 for j in range(x, x + length):
-                    self._field[y][j] = ship.__getitem__(ship_part)  # установка корабля на поле с k-палубами
+                    self._field[y][j] = ship[ship_part]  # установка корабля на поле с k-палубами
                     ship_part += 1
             elif ship.tp == ship.VERTICAL:
                 for i in range(y, y + length):
-                    self._field[i][x] = ship.__getitem__(ship_part)
+                    self._field[i][x] = ship[ship_part]
                     ship_part += 1
 
     def move_ships(self):
@@ -336,7 +341,7 @@ class SeaBattle:
         x = y = None
         while True:
             try:
-                coord = input('Введите координаты поля для выстрела в формате "a 1", "j 10", "g 3"').split()
+                coord = input('Введите координаты поля для выстрела в формате \'a 1\': ').split()
                 x, y = coord
             except (TypeError, IndexError, ValueError):
                 print('Введен не верный тип и/или диапазон координат')
@@ -345,13 +350,21 @@ class SeaBattle:
                 if coord[0].lower() in [chr(let) for let in range(97, 97 + self._size_field)] and \
                         coord[1] in [str(d) for d in range(1, self._size_field + 1)]:
                     x, y = self._x_coord_translate.get(coord[0]) - 1, int(coord[1]) - 1
+                    if (x, y) in self._hit_points_human:
+                        print('Координаты уже использовались')
+                        continue
                     break
                 continue
 
         shell_place = self.recognize_shell_place((x, y), self.human)  # определение места попадания снаряда
         self._hit_points_human.append((x, y))  # и сохранение координат места в список
-        if shell_place:
-            pass
+        if shell_place:  # если есть попадание в корабль
+            part_num = self._comp_ships_coord.get(shell_place).index((x, y))  # получаем номер палубы
+            shell_place[part_num] = 2  # и помечаем ее 'подбитой'
+            shell_place.is_move = False
+
+            self.computer.update_game_field()  # обновление поля и его отображение
+            self.computer.show()
 
     def computer_go(self):
         """Метод для реализации хода компьютера
