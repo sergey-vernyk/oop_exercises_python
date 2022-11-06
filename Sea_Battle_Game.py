@@ -87,7 +87,7 @@ class Ship:
         return all_coord, ship_coord
 
     def is_collide(self, ship: 'Ship') -> bool:
-        """Метод для проверки на столкновение или соприкосновение с другим кораблем 'ship'"""
+        """Метод для проверки на столкновение или соприкосновение с другим кораблем 'ship_hor'"""
         if isinstance(ship, Ship):
             # получение координат текущего корабля и другого корабля
             all_coord_ship, ship_coord = self._get_place_and_around_coordinates(self._tp, self)
@@ -371,9 +371,9 @@ class SeaBattle:
          случайным образом в свободные клетки"""
 
 
-battle = SeaBattle(10)
-battle.init()
-battle.human.show()
-battle.computer.show()
-battle.human_go()
-pass
+# battle = SeaBattle(10)
+# battle.init()
+# battle.human.show()
+# battle.computer.show()
+# battle.human_go()
+# pass
