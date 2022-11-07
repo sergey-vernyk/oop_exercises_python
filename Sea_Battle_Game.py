@@ -21,6 +21,17 @@ class Ship:
                f'{"Целый" if self._is_move else "Подбитый"}, ' \
                f'x={self._x} y={self._y})'
 
+    def __setattr__(self, key, value):
+        if key in ('_x', '_y', '_length'):
+            if not isinstance(value, int):
+                raise TypeError('Координаты и длина должны быть целыми числами')
+
+        if key == '_tp':
+            if not isinstance(value, int) or value not in (1, 2):
+                raise ValueError('Значение ориентации должно быть 1 или 2')
+
+        super().__setattr__(key, value)
+
     @property
     def tp(self):
         return self._tp
@@ -87,14 +98,14 @@ class Ship:
         return all_coord, ship_coord
 
     def is_collide(self, ship: 'Ship') -> bool:
-        """Метод для проверки на столкновение или соприкосновение с другим кораблем 'ship_hor'"""
+        """Метод для проверки на столкновение или соприкосновение с другим кораблем 'ship'"""
         if isinstance(ship, Ship):
             # получение координат текущего корабля и другого корабля
-            all_coord_ship, ship_coord = self._get_place_and_around_coordinates(self._tp, self)
-            all_coord_self, self_coord = ship._get_place_and_around_coordinates(ship._tp, ship)
-            common_coord = all_coord_ship & all_coord_self  # общие координаты двух кораблей
+            all_coord_self, self_coord = self._get_place_and_around_coordinates(self._tp, self)
+            all_coord_ship, ship_coord = ship._get_place_and_around_coordinates(ship._tp, ship)
+            common_coord = all_coord_self & all_coord_ship  # общие координаты двух кораблей
             # координаты мест пересечения кораблей(если таких нет - значит корабли не пересекаются и не касаются)
-            result = (ship_coord & common_coord) | (self_coord & common_coord)
+            result = (self_coord & common_coord) | (ship_coord & common_coord)
             return len(result) != 0
 
     def is_out_pole(self, size: int) -> bool:
@@ -105,7 +116,7 @@ class Ship:
 
     def _check_index(self, index) -> bool:
         """Метод для проверки индекса для работы со списком _cells"""
-        return 0 <= index <= len(self._cells)
+        return 0 <= index < len(self._cells)
 
     def __getitem__(self, item: int) -> int:
         """Метод для считывания значения из списка _cells по индексу item"""
@@ -370,6 +381,10 @@ class SeaBattle:
         """Метод для реализации хода компьютера
          случайным образом в свободные клетки"""
 
+
+# s1 = Ship(4, x=1, y=2)
+# s2 = Ship(3, x=5, y=6)
+# s1.is_collide(s2)
 
 # battle = SeaBattle(10)
 # battle.init()
