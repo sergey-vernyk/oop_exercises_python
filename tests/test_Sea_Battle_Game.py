@@ -1,4 +1,4 @@
-from unittest import TestCase, main
+from unittest import TestCase, main, skip
 from git_repo.oop_exercises_python import Sea_Battle_Game
 
 
@@ -36,6 +36,9 @@ class TestShip(TestCase):
     def test__check_index(self):
         self.assertEqual(self.ship_vert._check_index(2), True)
 
+    def test_broken_ship_state(self):
+        self.assertEqual(bool(self.ship_hor), False)
+
     def test_raise_type_error_set_coord(self):
         with self.assertRaises(TypeError) as te:
             self.ship_hor.__setattr__('_x', 2.5)
@@ -48,7 +51,57 @@ class TestShip(TestCase):
 
         self.assertEqual('Значение ориентации должно быть 1 или 2', ve.exception.args[0])
 
-    """Negative Test Cases"""
+
+class TestGamePole(TestCase):
+    def setUp(self) -> None:
+        self.field = Sea_Battle_Game.GamePole(10)
+
+        self.ship1 = Sea_Battle_Game.Ship(4, 1, 1, 2)
+        self.ship2 = Sea_Battle_Game.Ship(3, 2, 6, 4)
+        self.ship3 = Sea_Battle_Game.Ship(3, 1, 5, 9)
+        self.ship4 = Sea_Battle_Game.Ship(2, 1, 2, 0)
+        self.ship5 = Sea_Battle_Game.Ship(2, 1, 7, 1)
+        self.ship6 = Sea_Battle_Game.Ship(2, 1, 2, 7)
+        self.ship7 = Sea_Battle_Game.Ship(1, 2, 1, 9)
+        self.ship8 = Sea_Battle_Game.Ship(1, 1, 1, 4)
+        self.ship9 = Sea_Battle_Game.Ship(1, 2, 8, 7)
+        self.ship10 = Sea_Battle_Game.Ship(1, 2, 9, 3)
+
+        self.field._ships = [self.ship1, self.ship2, self.ship3,
+                             self.ship4, self.ship5, self.ship6,
+                             self.ship7, self.ship8,
+                             self.ship9, self.ship10]
+
+    @skip
+    def test__check_ships_around(self):
+        self.fail()
+
+    @skip
+    def test_init(self):
+        self.fail()
+
+    def test_get_ships(self):
+        result = self.field.get_ships()
+        self.assertListEqual(result, [self.ship1, self.ship2, self.ship3,
+                                      self.ship4, self.ship5, self.ship6,
+                                      self.ship7, self.ship8,
+                                      self.ship9, self.ship10])
+
+    @skip
+    def test_update_game_field(self):
+        self.fail()
+
+    @skip
+    def test_move_ships(self):
+        self.fail()
+
+    @skip
+    def test_show(self):
+        self.fail()
+
+    @skip
+    def test_get_pole(self):
+        self.fail()
 
 
 if __name__ == '__main__':

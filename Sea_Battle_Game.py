@@ -334,10 +334,8 @@ class SeaBattle:
 
     def __init__(self, size_field, name_1: str = 'Computer', name_2: str = 'Human'):
         self._size_field = size_field
-        self.computer = GamePole(size_field)
-        self.computer.name = name_1
-        self.human = GamePole(size_field)
-        self.human.name = name_2
+        self.computer, self.human = GamePole(size_field), GamePole(size_field)
+        self.computer.name, self.human.name = name_1, name_2  # имена игроков
         self._hit_points_comp = []  # координаты, в которые уже был выстрел
         self._hit_points_human = []
 
