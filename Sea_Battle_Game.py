@@ -23,7 +23,7 @@ class Ship:
 
     def __setattr__(self, key, value):
         if key in ('_x', '_y', '_length'):
-            if not isinstance(value, int):
+            if not isinstance(value, int) and value is not None:
                 raise TypeError('Координаты и длина должны быть целыми числами')
 
         if key == '_tp':
@@ -31,6 +31,12 @@ class Ship:
                 raise ValueError('Значение ориентации должно быть 1 или 2')
 
         super().__setattr__(key, value)
+
+    def __bool__(self):
+        """Метод для проверки состояния корабля
+        True - если корабль полностью уничтожен,
+        False - если есть еще целые палубы"""
+        return all(x == 2 for x in self._cells)
 
     @property
     def tp(self):
@@ -137,6 +143,10 @@ class GamePole:
         self._ships = []  # список из кораблей на поле
         self._field = [[0] * self._size for _ in range(self._size)]  # игровое поле
         self._name = ''
+        self._count_dead_ships = 0
+
+    def __bool__(self):
+        return self._count_dead_ships == 10
 
     @property
     def ships(self):
@@ -150,6 +160,15 @@ class GamePole:
     def name(self, value):
         if isinstance(value, str):
             self._name = value
+
+    @property
+    def count_dead_ships(self):
+        return self._count_dead_ships
+
+    @count_dead_ships.setter
+    def count_dead_ships(self, value):
+        if isinstance(value, int):
+            self._count_dead_ships = value
 
     def _check_ships_around(self, length: int, head_coord: tuple, orientation: int) -> int:
         """Метод для проверки наличия кораблей вокруг и на месте установки корабля"""
@@ -291,10 +310,13 @@ class GamePole:
     def show(self):
         """Метод для отображения игрового поля в консоли"""
         print(f'{self.name:^{self._size * 2}}')
+        print(' '.join(chr(i) for i in range(97, 97 + self._size)))
+        print('-' * (self._size * 2 - 1))
+
+        for i, row in enumerate(self._field, 1):
+            print(f'{" ".join(str(s) for s in row)}  {i}')
         print('_' * (self._size * 2 - 1))
-        for row in self._field:
-            print(*row, end='\n')
-        print('_' * (self._size * 2 - 1))
+        print()
 
     def get_pole(self) -> tuple:
         """Метод для получения текущего игрового поля"""
@@ -352,15 +374,15 @@ class SeaBattle:
         x = y = None
         while True:
             try:
-                coord = input('Введите координаты поля для выстрела в формате \'a 1\': ').split()
-                x, y = coord
+                coord = input('Введите координаты поля для выстрела в формате \'a1\': ')
+                x, y = coord[0], str(coord[1:])
             except (TypeError, IndexError, ValueError):
                 print('Введен не верный тип и/или диапазон координат')
                 continue
             else:
                 if coord[0].lower() in [chr(let) for let in range(97, 97 + self._size_field)] and \
                         coord[1] in [str(d) for d in range(1, self._size_field + 1)]:
-                    x, y = self._x_coord_translate.get(coord[0]) - 1, int(coord[1]) - 1
+                    x, y = self._x_coord_translate.get(x) - 1, int(y) - 1
                     if (x, y) in self._hit_points_human:
                         print('Координаты уже использовались')
                         continue
@@ -369,26 +391,57 @@ class SeaBattle:
 
         shell_place = self.recognize_shell_place((x, y), self.human)  # определение места попадания снаряда
         self._hit_points_human.append((x, y))  # и сохранение координат места в список
-        if shell_place:  # если есть попадание в корабль
-            part_num = self._comp_ships_coord.get(shell_place).index((x, y))  # получаем номер палубы
-            shell_place[part_num] = 2  # и помечаем ее 'подбитой'
-            shell_place.is_move = False
 
+        if shell_place is not None:  # если есть попадание в корабль
+            self._marked_broken_ship_part(self.human, shell_place, (x, y))
             self.computer.update_game_field()  # обновление поля и его отображение
-            self.computer.show()
+        self.computer.show()
+
+    def _marked_broken_ship_part(self, gamer: GamePole, shell_place: Ship, coord_place: tuple):
+        """Метод реализует поиск подбитой палубы корабля и отмечает ее как уничтоженную"""
+        ships_coord = self._human_ships_coord if gamer is self.computer else self._comp_ships_coord
+        part_num = ships_coord.get(shell_place).index(coord_place)  # получаем номер палубы
+        shell_place[part_num] = 2  # и помечаем ее 'подбитой'
+        shell_place.is_move = False
+        if shell_place:
+            gamer.count_dead_ships += 1
 
     def computer_go(self):
         """Метод для реализации хода компьютера
          случайным образом в свободные клетки"""
+        while True:
+            x, y = randint(0, self._size_field - 1), randint(0, self._size_field - 1)
+            if (x, y) in self._hit_points_comp:
+                continue
+            break
+
+        shell_place = self.recognize_shell_place((x, y), self.computer)  # определение места попадания снаряда
+        self._hit_points_comp.append((x, y))  # и сохранение координат места в список
+
+        if shell_place is not None:  # если есть попадание в корабль
+            self._marked_broken_ship_part(self.computer, shell_place, (x, y))
+            self.human.update_game_field()  # обновление поля и его отображение
+        self.human.show()
+
+    def __bool__(self):
+        """Метод определяет окончание битвы
+        Если кто-то убил все 10 кораблей - игра останавливается"""
+        return not self.human and not self.computer
 
 
-# s1 = Ship(4, x=1, y=2)
-# s2 = Ship(3, x=5, y=6)
-# s1.is_collide(s2)
+battle = SeaBattle(10)
 
-# battle = SeaBattle(10)
-# battle.init()
-# battle.human.show()
-# battle.computer.show()
-# battle.human_go()
-# pass
+battle.init()
+battle.computer.show()
+battle.human.show()
+
+steps = 0
+while battle:
+    if not steps % 2:
+        battle.human_go()
+    else:
+        battle.computer_go()
+
+    steps += 1
+
+print('You Win!' if battle.human else 'You loose')
