@@ -72,36 +72,70 @@ class TestGamePole(TestCase):
                              self.ship7, self.ship8,
                              self.ship9, self.ship10]
 
-    @skip
-    def test__check_ships_around(self):
-        self.fail()
+        for ship in self.field._ships:
+            x, y, tp, length = ship.x, ship.y, ship.tp, ship.length
+            if ship.tp == ship.HORIZONTAL:
+                k = 0
+                for j in range(x, x + length):
+                    self.field._field[y][j] = ship[k]  # установка корабля на поле с k-палубами
+                    k += 1
+            elif ship.tp == ship.VERTICAL:
+                k = 0
+                for i in range(y, y + length):
+                    self.field._field[i][x] = ship[k]
+                    k += 1
 
-    @skip
-    def test_init(self):
-        self.fail()
+    def test__check_ships_around_no_ships(self):
+        result = self.field._check_ships_around(2, (4, 4), 2)  # кораблей нет вокруг
+        self.assertEqual(result, 0)
+
+    def test__check_ships_around_one_ship(self):
+        result = self.field._check_ships_around(2, (4, 5), 1)  # есть один корабль
+        self.assertEqual(result, 3)
 
     def test_get_ships(self):
         result = self.field.get_ships()
-        self.assertListEqual(result, [self.ship1, self.ship2, self.ship3,
-                                      self.ship4, self.ship5, self.ship6,
-                                      self.ship7, self.ship8,
-                                      self.ship9, self.ship10])
+        self.assertListEqual(result, [self.ship1, self.ship2, self.ship3, self.ship4, self.ship5, self.ship6,
+                                      self.ship7, self.ship8, self.ship9, self.ship10])
 
-    @skip
     def test_update_game_field(self):
-        self.fail()
+        new_position = [[0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
+                        [1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+                        [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 1, 0, 1, 0],
+                        [0, 0, 0, 1, 1, 0, 1, 0, 0, 0],
+                        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 1, 1, 1, 0]]
 
-    @skip
-    def test_move_ships(self):
-        self.fail()
+        self.ship1.set_start_coords(0, 2)
+        self.ship2.set_start_coords(6, 5)
+        self.ship3.set_start_coords(6, 9)
+        self.ship4.set_start_coords(1, 0)
+        self.ship5.set_start_coords(6, 1)
+        self.ship6.set_start_coords(3, 7)
+        self.ship7.set_start_coords(1, 8)
+        self.ship8.set_start_coords(2, 4)
+        self.ship9.set_start_coords(8, 6)
+        self.ship10.set_start_coords(9, 4)
 
-    @skip
-    def test_show(self):
-        self.fail()
+        self.field.update_game_field()
 
-    @skip
+        self.assertEqual(self.field._field, new_position)
+
     def test_get_pole(self):
-        self.fail()
+        self.assertEqual(self.field.get_pole(), ((0, 0, 1, 1, 0, 0, 0, 0, 0, 0),
+                                                 (0, 0, 0, 0, 0, 0, 0, 1, 1, 0),
+                                                 (0, 1, 1, 1, 1, 0, 0, 0, 0, 0),
+                                                 (0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+                                                 (0, 1, 0, 0, 0, 0, 1, 0, 0, 0),
+                                                 (0, 0, 0, 0, 0, 0, 1, 0, 0, 0),
+                                                 (0, 0, 0, 0, 0, 0, 1, 0, 0, 0),
+                                                 (0, 0, 1, 1, 0, 0, 0, 0, 1, 0),
+                                                 (0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+                                                 (0, 1, 0, 0, 0, 1, 1, 1, 0, 0)))
 
 
 if __name__ == '__main__':

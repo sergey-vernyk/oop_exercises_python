@@ -144,6 +144,7 @@ class GamePole:
         self._field = [[0] * self._size for _ in range(self._size)]  # игровое поле
         self._name = ''
         self._count_dead_ships = 0
+        self._generate_ships()  # создание кораблей
 
     def __bool__(self):
         return self._count_dead_ships == 10
@@ -196,13 +197,15 @@ class GamePole:
 
         return result
 
-    def init(self):
-        """Метод для начальной инициализации игрового поля"""
+    def _generate_ships(self):
+        """Метод для создания кораблей со случайной ориентацией и без начальных координат"""
         self._ships = [Ship(4, tp=randint(1, 2)), Ship(3, tp=randint(1, 2)), Ship(3, tp=randint(1, 2)),
                        Ship(2, tp=randint(1, 2)), Ship(2, tp=randint(1, 2)), Ship(2, tp=randint(1, 2)),
                        Ship(1, tp=randint(1, 2)), Ship(1, tp=randint(1, 2)), Ship(1, tp=randint(1, 2)),
                        Ship(1, tp=randint(1, 2))]
 
+    def init(self):
+        """Метод для начальной инициализации игрового поля"""
         for ship in self._ships:
             tp, length = ship.tp, ship.length
             while True:  # пока корабли не расставлены
@@ -423,7 +426,7 @@ class SeaBattle:
 
     def __bool__(self):
         """Метод определяет окончание битвы
-        Если кто-то убил все 10 кораблей - игра останавливается"""
+        Если кто-то уничтожил все 10 кораблей - игра останавливается"""
         return not self.human and not self.computer
 
 
@@ -442,4 +445,4 @@ while battle:
 
     steps += 1
 
-print('You Win!' if battle.human else 'You loose')
+print('You Win!' if battle.human else 'You loose!')
