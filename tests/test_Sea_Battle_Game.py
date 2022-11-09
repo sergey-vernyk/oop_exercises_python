@@ -36,9 +36,9 @@ class TestShip(TestCase):
         self.assertEqual(self.ship_vert._check_index(3), False)
 
     def test_broken_ship_state(self):
-        self.assertEqual(bool(self.ship_hor), False)
-        self.ship_hor._cells = [2 for _ in range(self.ship_hor.length)]  # все палубы разрушены
         self.assertEqual(bool(self.ship_hor), True)
+        self.ship_hor._cells = [2 for _ in range(self.ship_hor.length)]  # все палубы разрушены
+        self.assertEqual(bool(self.ship_hor), False)
 
     def test_raise_type_error_set_coord_float(self):
         with self.assertRaises(TypeError) as te:
@@ -146,16 +146,59 @@ class TestGamePole(TestCase):
                                                  (0, 1, 0, 0, 0, 1, 1, 1, 0, 0)))
 
 
-@skip
 class TestSeaBattle(TestCase):
-    def test_get_all_ships_parts_coord(self):
-        self.fail()
 
-    def test_recognize_shell_place(self):
-        self.fail()
+    def setUp(self):
+        self.battle = Sea_Battle_Game.SeaBattle(10)
+
+        self.ship1 = Sea_Battle_Game.Ship(4, 1, 1, 2)
+        self.ship2 = Sea_Battle_Game.Ship(3, 2, 6, 4)
+        self.ship3 = Sea_Battle_Game.Ship(3, 1, 5, 9)
+        self.ship4 = Sea_Battle_Game.Ship(2, 1, 2, 0)
+        self.ship5 = Sea_Battle_Game.Ship(2, 1, 7, 1)
+        self.ship6 = Sea_Battle_Game.Ship(2, 1, 2, 7)
+        self.ship7 = Sea_Battle_Game.Ship(1, 2, 1, 9)
+        self.ship8 = Sea_Battle_Game.Ship(1, 1, 1, 4)
+        self.ship9 = Sea_Battle_Game.Ship(1, 2, 8, 7)
+        self.ship10 = Sea_Battle_Game.Ship(1, 2, 9, 3)
+
+        self.battle.human._ships = [self.ship1, self.ship2, self.ship3, self.ship4, self.ship5,
+                                    self.ship6, self.ship7, self.ship8, self.ship9, self.ship10]
+
+        self.battle._human_ships_coord = self.battle.get_all_ships_parts_coord(self.battle.human)
+
+    def test_get_all_ships_parts_coord(self):
+        result = self.battle.get_all_ships_parts_coord(self.battle.human)
+        self.assertDictEqual(result, {self.ship1: [(1, 2), (2, 2), (3, 2), (4, 2)],
+                                      self.ship2: [(6, 4), (6, 5), (6, 6)],
+                                      self.ship3: [(5, 9), (6, 9), (7, 9)],
+                                      self.ship4: [(2, 0), (3, 0)],
+                                      self.ship5: [(7, 1), (8, 1)],
+                                      self.ship6: [(2, 7), (3, 7)],
+                                      self.ship7: [(1, 9)],
+                                      self.ship8: [(1, 4)],
+                                      self.ship9: [(8, 7)],
+                                      self.ship10: [(9, 3)]})
+
+    def test_recognize_shell_place_not_none(self):
+        result = self.battle.recognize_shell_place((4, 2), self.battle.computer)
+        self.assertIsNotNone(result)
+
+    def test_recognize_shell_place_none(self):
+        result = self.battle.recognize_shell_place((4, 5), self.battle.computer)
+        self.assertIsNone(result)
 
     def test__marked_broken_ship_part(self):
-        self.fail()
+        self.battle._marked_broken_ship_part(self.battle.computer, self.ship1, (2, 2))
+        self.assertEqual(self.battle.computer.count_dead_ships, 0)
+        self.assertEqual(self.ship1.is_move, False)
+        self.assertEqual(self.ship1._cells[1], 2)
+
+    def test_count_dead_ships(self):
+        for i in range(1, len(self.ship1._cells) + 1):
+            self.battle._marked_broken_ship_part(self.battle.computer, self.ship1, (i, 2))
+
+        self.assertEqual(self.battle.computer.count_dead_ships, 1)
 
 
 if __name__ == '__main__':
