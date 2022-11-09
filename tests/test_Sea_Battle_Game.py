@@ -7,8 +7,6 @@ class TestShip(TestCase):
         self.ship_hor = Sea_Battle_Game.Ship(4, x=1, y=2)
         self.ship_vert = Sea_Battle_Game.Ship(3, tp=2, x=2, y=5)
 
-    """Positive Test Cases"""
-
     def test_set_start_coords(self):
         self.ship_hor.set_start_coords(3, 6)
         self.assertEqual(self.ship_hor.get_start_coords(), (3, 6))
@@ -35,15 +33,24 @@ class TestShip(TestCase):
 
     def test__check_index(self):
         self.assertEqual(self.ship_vert._check_index(2), True)
+        self.assertEqual(self.ship_vert._check_index(3), False)
 
     def test_broken_ship_state(self):
         self.assertEqual(bool(self.ship_hor), False)
+        self.ship_hor._cells = [2 for _ in range(self.ship_hor.length)]  # все палубы разрушены
+        self.assertEqual(bool(self.ship_hor), True)
 
-    def test_raise_type_error_set_coord(self):
+    def test_raise_type_error_set_coord_float(self):
         with self.assertRaises(TypeError) as te:
             self.ship_hor.__setattr__('_x', 2.5)
 
-        self.assertEqual('Координаты и длина должны быть целыми числами', te.exception.args[0])
+        self.assertEqual('Координаты и длина должны быть целыми положительными числами', te.exception.args[0])
+
+    def test_raise_type_error_set_coord_negative(self):
+        with self.assertRaises(TypeError) as te:
+            self.ship_hor.__setattr__('_x', -2)
+
+        self.assertEqual('Координаты и длина должны быть целыми положительными числами', te.exception.args[0])
 
     def test_raise_value_error_set_orientation(self):
         with self.assertRaises(ValueError) as ve:
@@ -53,6 +60,7 @@ class TestShip(TestCase):
 
 
 class TestGamePole(TestCase):
+
     def setUp(self) -> None:
         self.field = Sea_Battle_Game.GamePole(10)
 
@@ -136,6 +144,18 @@ class TestGamePole(TestCase):
                                                  (0, 0, 1, 1, 0, 0, 0, 0, 1, 0),
                                                  (0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
                                                  (0, 1, 0, 0, 0, 1, 1, 1, 0, 0)))
+
+
+@skip
+class TestSeaBattle(TestCase):
+    def test_get_all_ships_parts_coord(self):
+        self.fail()
+
+    def test_recognize_shell_place(self):
+        self.fail()
+
+    def test__marked_broken_ship_part(self):
+        self.fail()
 
 
 if __name__ == '__main__':

@@ -23,8 +23,9 @@ class Ship:
 
     def __setattr__(self, key, value):
         if key in ('_x', '_y', '_length'):
-            if not isinstance(value, int) and value is not None:
-                raise TypeError('Координаты и длина должны быть целыми числами')
+            if not isinstance(value, int) and value is not None or \
+                    isinstance(value, int) and value < 0:
+                raise TypeError('Координаты и длина должны быть целыми положительными числами')
 
         if key == '_tp':
             if not isinstance(value, int) or value not in (1, 2):
@@ -430,19 +431,19 @@ class SeaBattle:
         return not self.human and not self.computer
 
 
-battle = SeaBattle(10)
+# battle = SeaBattle(10)
+#
+# battle.init()
+# battle.computer.show()
+# battle.human.show()
+#
+# steps = 0
+# while battle:
+#     if not steps % 2:
+#         battle.human_go()
+#     else:
+#         battle.computer_go()
+#
+#     steps += 1
 
-battle.init()
-battle.computer.show()
-battle.human.show()
-
-steps = 0
-while battle:
-    if not steps % 2:
-        battle.human_go()
-    else:
-        battle.computer_go()
-
-    steps += 1
-
-print('You Win!' if battle.human else 'You loose!')
+# print('You Win!' if battle.human else 'You loose!')
