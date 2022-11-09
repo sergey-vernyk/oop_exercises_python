@@ -35,9 +35,9 @@ class Ship:
 
     def __bool__(self):
         """Метод для проверки состояния корабля
-        True - если корабль полностью уничтожен,
-        False - если есть еще целые палубы"""
-        return all(x == 2 for x in self._cells)
+        False - если корабль полностью уничтожен,
+        True - если есть еще целые палубы"""
+        return not all(x == 2 for x in self._cells)
 
     @property
     def tp(self):
@@ -342,6 +342,7 @@ class SeaBattle:
         self.computer.name, self.human.name = name_1, name_2  # имена игроков
         self._hit_points_comp = []  # координаты, в которые уже был выстрел
         self._hit_points_human = []
+        self.result_field = [['-'] * self._size_field for _ in range(self._size_field)]
 
     def init(self):
         """Метод инициализации полей компьютера и человека.
@@ -397,7 +398,9 @@ class SeaBattle:
         if shell_place is not None:  # если есть попадание в корабль
             self._marked_broken_ship_part(self.human, shell_place, (x, y))
             self.computer.update_game_field()  # обновление поля и его отображение
-        self.computer.show()
+            self.show_shot_location(x, y, 'X')  # отобразить на другом поле попадание по кораблю на x, y координате
+        else:
+            self.show_shot_location(x, y, '*')  # отобразить на другом поле промах на x, y координате
 
     def _marked_broken_ship_part(self, gamer: GamePole, shell_place: Ship, coord_place: tuple):
         """Метод реализует поиск подбитой палубы корабля и отмечает ее как уничтоженную"""
@@ -405,7 +408,7 @@ class SeaBattle:
         part_num = ships_coord.get(shell_place).index(coord_place)  # получаем номер палубы
         shell_place[part_num] = 2  # и помечаем ее 'подбитой'
         shell_place.is_move = False
-        if shell_place:
+        if not shell_place:  # если корабль полностью уничтожен - увеличить счетчик уничтоженных кораблей
             gamer.count_dead_ships += 1
 
     def computer_go(self):
@@ -425,25 +428,40 @@ class SeaBattle:
             self.human.update_game_field()  # обновление поля и его отображение
         self.human.show()
 
+    def show_shot_location(self, x: int, y: int, state: str):
+        """Метод отображает поле с местом попадания снаряда после выстрела
+        Поле отображается только после хода человека; X - было попадание в корабль;
+        * - выстрел мимо"""
+        self.result_field[y][x] = state
+
+        print(' '.join(chr(i) for i in range(97, 97 + self._size_field)))
+        print('-' * (self._size_field * 2 - 1))
+
+        for i, row in enumerate(self.result_field, 1):
+            print(f'{" ".join(str(s) for s in row)}  {i}')
+        print('_' * (self._size_field * 2 - 1))
+        print()
+
     def __bool__(self):
-        """Метод определяет окончание битвы
+        """Метод определяет окончание битвы.
         Если кто-то уничтожил все 10 кораблей - игра останавливается"""
         return not self.human and not self.computer
 
 
-# battle = SeaBattle(10)
-#
-# battle.init()
-# battle.computer.show()
-# battle.human.show()
-#
-# steps = 0
-# while battle:
-#     if not steps % 2:
-#         battle.human_go()
-#     else:
-#         battle.computer_go()
-#
-#     steps += 1
+if __name__ == '__main__':
 
-# print('You Win!' if battle.human else 'You loose!')
+    battle = SeaBattle(size_field=10)
+
+    battle.init()
+    battle.human.show()
+
+    steps = 0
+    while battle:
+        if not steps % 2:
+            battle.human_go()
+        else:
+            battle.computer_go()
+
+        steps += 1
+
+    print('You Win!' if battle.human else 'You loose!')
