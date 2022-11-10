@@ -292,7 +292,11 @@ class GamePole:
                 else:
                     break
 
-                ship.set_start_coords(x, y)  # применяем новые координаты начала для корабля
+                try:
+                    ship.set_start_coords(x, y)  # пробуем применить новые координаты начала для корабля
+                except TypeError:  # если координаты меньше 0, то ловим исключение и пробуем другое направление
+                    continue
+
                 if ship.is_out_pole(self._size):  # если корабль выходит за поле - попробовать другое направление
                     ship.set_start_coords(old_x, old_y)
                     continue
