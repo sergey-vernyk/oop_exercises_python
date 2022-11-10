@@ -336,17 +336,21 @@ class GamePole:
 
 class SeaBattle:
     """Класс для настройки и работы игрового процесса"""
-    _x_coord_translate = {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6, 'g': 7, 'h': 8, 'i': 9, 'j': 10}
+    _x_coord_translate = {}  # словарь с переводом из буквенного обозначения координаты в цифру 'а' -> 1
     _comp_ships_coord = {}  # координаты всех палуб кораблей компьютера
     _human_ships_coord = {}  # координаты всех палуб кораблей человека
 
-    def __init__(self, size_field, name_1: str = 'Computer', name_2: str = 'Human'):
+    def __init__(self, size_field, c_name: str = 'Computer', h_name: str = 'Human'):
         self._size_field = size_field
         self.computer, self.human = GamePole(size_field), GamePole(size_field)
-        self.computer.name, self.human.name = name_1, name_2  # имена игроков
+        self.computer.name, self.human.name = c_name, h_name  # имена игроков
         self._hit_points_comp = []  # координаты, в которые уже был выстрел
         self._hit_points_human = []
-        self.result_field = [['-'] * self._size_field for _ in range(self._size_field)]
+        self.result_field = [['-'] * self._size_field for _ in range(self._size_field)]  # поле с завершенными ходами
+
+        # обновление словаря с переводом координаты в зависимости от размера поля
+        self._x_coord_translate.update(
+            {chr(let): num for let, num in zip(range(97, 97 + self._size_field), range(1, self._size_field + 1))})
 
     def init(self):
         """Метод инициализации полей компьютера и человека.
@@ -468,4 +472,4 @@ if __name__ == '__main__':
 
         steps += 1
 
-    print('You Win!' if battle.human else 'You loose!')
+    print(f'{battle.human.name} - You Win!' if battle.human else f'{battle.human.name} - You loose!')
